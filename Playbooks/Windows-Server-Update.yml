@@ -1,0 +1,36 @@
+- name: windows rolling update
+  hosts: all
+  tasks:
+    - name: Search all Security. critial and rollup updates
+      win_updates:
+        category_names:
+          - Updates
+          - CriticalUpdates
+          - SecurityUpdates
+          - DefinitionUpdates
+          - FeaturePacks
+          - ServicePacks
+        state: searched
+#        register: result
+#        until: result not failed
+#        retries: 100
+#        delay: 6
+        log_path: c:\WinUpdateSearched.txt
+
+    - name: Install all critical and security updates
+      win_updates:
+        category_names:
+          - Updates
+          - CriticalUpdates
+          - SecurityUpdates
+          - DefinitionUpdates
+          - FeaturePacks
+          - ServicePacks
+        reboot: yes
+        state: installed
+        reboot_timeout: 3600
+        log_path: C:\ansible.txt
+#      register: result
+#      until: result is not failed
+#      retries: 100
+#      delay: 6

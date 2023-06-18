@@ -1,0 +1,36 @@
+---
+- name: Update Windows machines
+  hosts: all
+  become_method: runas
+  collections:
+    - community.windows
+
+  tasks:
+    # - name: Add PSget
+    #   community.windows.win_psrepository:
+    #     name: PowerShellGet
+    #     instalation_policy: untrusted
+
+    - name: Add PSGallery
+      community.windows.win_psrepository:
+        name: PSGallery
+        installation_policy: untrusted
+
+    - name: Install PSWindowsUpdate Module
+      community.windows.win_psmodule:
+        name: PSWindowsUpdate
+        accept_license: true
+        skip_publisher_check: true
+        state: present
+        become: yes
+        become_user: Netsupport
+        log_path: C:\InstallModule
+
+    - name: Get The Updates
+      ansible.windows.win_shell: |
+        Get-WindowsUpdate
+
+    - name: Install the updates
+      ansible.windows.win_shell: Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -Install -AutoReboot
+      become: yes
+      become_user: Netsupport

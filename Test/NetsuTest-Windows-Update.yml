@@ -1,0 +1,51 @@
+- name: Netsupport Windows 11 Defaults
+  hosts: all
+  become_method: runas
+  collections:
+    - community.windows
+
+  tasks:
+    - name: Add PSGallery
+      community.windows.win_psrepository:
+        name: PSGallery
+        installation_policy: untrusted
+    
+    - name: Install PSWindowsUpdate Module
+      community.windows.win_psmodule:
+        name: PSWindowsUpdate
+        accept_license: true
+        skip_publisher_check: true
+        state: present
+        become: yes
+        become_user: Netsupport
+        log_path: C:\InstallModule
+
+    - name: Get The Updates
+      ansible.windows.win_shell: |
+        Get-WindowsUpdate
+
+    - name: Install the updates
+      ansible.windows.win_shell: Get-WindowsUpdate -AcceptAll -Install
+      become: yes
+      become_user: Netsupport
+
+    - name: Tweak - Taskbar Left
+      ansible.windows.win_regedit:
+        path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\
+        name: TaskbarAI
+        data: 1
+        type: dword
+      
+    - name: Tweak - Search Icon
+      ansible.windows.win_regedit:
+        path: HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search
+        name: SearchboxTaskbarMode
+        data: 1
+        type: dword
+
+    - name: ShortcutDesktop - Chrome
+      community.windows.win_shortcut:
+        src: C:\Program Files\Google\Chrome\Application\chrome.exe
+        dest: C:\Users\Netsupport\Desktop\Google Chrome.lnk
+        icon: C:\Program Files\Google\Chrome\Application\chrome.exe,0
+    

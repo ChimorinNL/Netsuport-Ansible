@@ -1,0 +1,12 @@
+- name: Netsupport Default Packages
+  hosts: all
+  tasks:
+    - name: Install Default Applications
+      win_chocolatey:
+        name:
+          - vlc
+          - hpsupportassistant
+          - 7zip
+          - adobereader
+          - googlechrome
+        state: present

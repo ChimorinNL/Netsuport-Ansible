@@ -1,0 +1,150 @@
+- name: Netsupport Windows 11 Defaults
+  hosts: all
+  become_method: runas
+  collections:
+    - community.windows
+
+  tasks:
+    ### - Install The Default Packages
+
+    # - name: Install Default Applications
+    #   win_chocolatey:
+    #     name:
+    #       - vlc
+    #       - hpsupportassistant
+    #       - 7zip
+    #       - adobereader
+    #       - googlechrome
+    #     state: present
+
+    # - name: Install Teamviewer
+    #   ansible.windows.win_package:
+    #     path: https://get.teamviewer.com/mzx25rc
+
+    - name: Add PSGallery
+      community.windows.win_psrepository:
+        name: PSGallery
+        installation_policy: untrusted
+
+    - name: Install PSWindowsUpdate Module
+      community.windows.win_psmodule:
+        name: PSWindowsUpdate
+        accept_license: true
+        skip_publisher_check: true
+        state: present
+        become: yes
+        become_user: Netsupport
+        log_path: C:\InstallModule
+
+    - name: Get The Updates
+      ansible.windows.win_shell: |
+        Get-WindowsUpdate
+
+    - name: Install the updates
+      ansible.windows.win_shell: Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -Install -AutoReboot
+      become: yes
+      become_user: Netsupport
+
+    - name: Tweak - Taskbar Left
+      ansible.windows.win_regedit:
+        path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\
+        name: TaskbarAI
+        data: 1
+        type: dword
+
+    - name: Tweak - Search Icon
+      ansible.windows.win_regedit:
+        path: HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search
+        name: SearchboxTaskbarMode
+        data: 1
+        type: dword
+
+    ### - Taskbar
+
+    - name: Create Word shortcut on Taskbar
+      win_shell: |
+        $WordShortcutPath = "$env:APPDATA\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\Word.lnk"
+        $WordTargetPath = "C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE"
+        $WScriptShell = New-Object -ComObject WScript.Shell
+        $Shortcut = $WScriptShell.CreateShortcut($WordShortcutPath)
+        $Shortcut.TargetPath = $WordTargetPath
+        $Shortcut.Save()
+
+    - name: Create Outlook shortcut on Taskbar
+      win_shell: |
+        $OutlookShortcutPath = "$env:APPDATA\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\Outlook.lnk"
+        $OutlookTargetPath = "C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE"
+        $WScriptShell = New-Object -ComObject WScript.Shell
+        $Shortcut = $WScriptShell.CreateShortcut($OutlookShortcutPath)
+        $Shortcut.TargetPath = $OutlookTargetPath
+        $Shortcut.Save()
+
+    - name: Create Chrome shortcut on Taskbar
+      win_shell: |
+        $ChromeShortcutPath = "$env:APPDATA\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\Google Chrome.lnk"
+        $ChromeTargetPath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+        $WScriptShell = New-Object -ComObject WScript.Shell
+        $Shortcut = $WScriptShell.CreateShortcut($ChromeShortcutPath)
+        $Shortcut.TargetPath = $ChromeTargetPath
+        $Shortcut.Save()
+
+    ### - Desktop
+
+    - name: Create Word shortcut on Desktop
+      win_shell: |
+        $WordShortcutPath = "$env:USERPROFILE\Desktop\Word.lnk"
+        $WordTargetPath = "C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE"
+        $WScriptShell = New-Object -ComObject WScript.Shell
+        $Shortcut = $WScriptShell.CreateShortcut($WordShortcutPath)
+        $Shortcut.TargetPath = $WordTargetPath
+        $Shortcut.Save()
+
+    - name: Create Outlook shortcut on Desktop
+      win_shell: |
+        $OutlookShortcutPath = "$env:USERPROFILE\Desktop\Outlook.lnk"
+        $OutlookTargetPath = "C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE"
+        $WScriptShell = New-Object -ComObject WScript.Shell
+        $Shortcut = $WScriptShell.CreateShortcut($OutlookShortcutPath)
+        $Shortcut.TargetPath = $OutlookTargetPath
+        $Shortcut.Save()
+
+    - name: Create Chrome shortcut on Desktop
+      win_shell: |
+        $ChromeShortcutPath = "$env:USERPROFILE\Desktop\Google Chrome.lnk"
+        $ChromeTargetPath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+        $WScriptShell = New-Object -ComObject WScript.Shell
+        $Shortcut = $WScriptShell.CreateShortcut($ChromeShortcutPath)
+        $Shortcut.TargetPath = $ChromeTargetPath
+        $Shortcut.Save()
+
+    ### - Start Menu
+
+    - name: Create Word shortcut in Start Menu
+      win_shell: |
+        $StartMenuPath = [Environment]::GetFolderPath("CommonStartMenu")
+        $WordShortcutPath = Join-Path -Path $StartMenuPath -ChildPath "Programs\Word.lnk"
+        $WordTargetPath = "C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE"
+        $WScriptShell = New-Object -ComObject WScript.Shell
+        $Shortcut = $WScriptShell.CreateShortcut($WordShortcutPath)
+        $Shortcut.TargetPath = $WordTargetPath
+        $Shortcut.Save()
+
+    - name: Create Outlook shortcut in Start Menu
+      win_shell: |
+        $StartMenuPath = [Environment]::GetFolderPath("CommonStartMenu")
+        $OutlookShortcutPath = Join-Path -Path $StartMenuPath -ChildPath "Programs\Outlook.lnk"
+        $OutlookTargetPath = "C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE"
+        $WScriptShell = New-Object -ComObject WScript.Shell
+        $Shortcut = $WScriptShell.CreateShortcut($OutlookShortcutPath)
+        $Shortcut.TargetPath = $OutlookTargetPath
+        $Shortcut.Save()
+
+    - name: Create Chrome shortcut in Start Menu
+      win_shell: |
+        $StartMenuPath = [Environment]::GetFolderPath("CommonStartMenu")
+        $ChromeShortcutPath = Join-Path -Path $StartMenuPath -ChildPath "Programs\Google Chrome.lnk"
+        $ChromeTargetPath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+        $WScriptShell = New-Object -ComObject WScript.Shell
+        $Shortcut = $WScriptShell.CreateShortcut($ChromeShortcutPath)
+        $Shortcut.TargetPath = $ChromeTargetPath
+        $Shortcut.Save()

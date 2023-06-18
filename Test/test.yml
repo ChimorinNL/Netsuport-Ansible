@@ -1,0 +1,21 @@
+
+    - name: Check for available updates
+      win_updates:
+        category_names:
+          ["Critical Updates", "Security Updates", "Update Rollups"]
+        state: searched
+      register: update_results
+
+    - name: Download updates
+      win_updates:
+        category_names:
+          ["Critical Updates", "Security Updates", "Update Rollups"]
+        state: downloaded
+      when: update_results.updates | length > 0
+
+    - name: Install updates
+      win_updates:
+        category_names:
+          ["Critical Updates", "Security Updates", "Update Rollups"]
+        state: installed
+      when: update_results.updates | length > 0
