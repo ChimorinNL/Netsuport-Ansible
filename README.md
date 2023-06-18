@@ -1,4 +1,4 @@
-# AnsibleChimorin
+# Netsupport Ansible
 Ansible Playbooks for Windows machines
 
 ## Prerequistes
